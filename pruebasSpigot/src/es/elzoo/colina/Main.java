@@ -1,12 +1,12 @@
 package es.elzoo.colina;
 
-import java.util.logging.Level;
-
 import org.bukkit.plugin.java.JavaPlugin;
+
+import es.elzoo.colina.eventos.CartelesEventos;
 
 public class Main extends JavaPlugin {
 	@Override
 	public void onEnable() {
-		this.getLogger().log(Level.FINE, "Im alive");
+		getServer().getPluginManager().registerEvents(new CartelesEventos(), this);
 	}
 }
