@@ -1,5 +1,9 @@
 package es.elzoo.colina.eventos;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -10,6 +14,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class CartelesEventos implements Listener {
+	static private Map<UUID, Long> cdCasco = new HashMap<>();
+	
+	private final static int cd = 30;
 	
 	@EventHandler
 	public static void onPlayerInteract(PlayerInteractEvent event) {
@@ -37,7 +44,18 @@ public class CartelesEventos implements Listener {
 	}
 	
 	private static void giveCasco(Player player) {
-		player.getInventory().addItem(new ItemStack(Material.LEATHER_HELMET, 1));
+		if (cdCasco.get(player.getUniqueId()) == null) {
+			cdCasco.put(player.getUniqueId(), System.currentTimeMillis());
+			player.getInventory().addItem(new ItemStack(Material.LEATHER_HELMET, 1));
+			return;
+		}
+		if ((cdCasco.get(player.getUniqueId())/1000 + cd) <= (System.currentTimeMillis()/1000)) {
+			cdCasco.put(player.getUniqueId(), System.currentTimeMillis());
+			player.getInventory().addItem(new ItemStack(Material.LEATHER_HELMET, 1));
+		} else {
+			Long time = (cdCasco.get(player.getUniqueId())/1000 + cd) - (System.currentTimeMillis()/1000);
+			player.sendMessage("Te quedan " + time + " segundos para poder usar ese cartel otra vez");
+		}
 	}
 	
 	private static void giveEspada(Player player) {
