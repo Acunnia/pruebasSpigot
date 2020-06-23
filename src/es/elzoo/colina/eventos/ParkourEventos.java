@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,12 +16,24 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+
+import es.elzoo.colina.Main;
 
 public class ParkourEventos implements Listener {
 	static private Map<UUID, Long> tiempos = new HashMap<>();
 	static private Map<UUID, Integer> checkpoints = new HashMap<>();
+	static private Map<UUID, BukkitTask> tareas = new HashMap<>();
 	
 	static private final Integer cpoints = 5;
+	
+	private final Main plugin;
+	
+	public ParkourEventos(Main plugin) {
+		this.plugin = plugin;
+	}
+	
 	
 	@EventHandler
 	public void onPressurePlate(PlayerInteractEvent event) {
@@ -43,12 +56,24 @@ public class ParkourEventos implements Listener {
 		if (tiempos.get(player.getUniqueId()) == null) {
 			tiempos.put(player.getUniqueId(), System.currentTimeMillis());
 			checkpoints.put(player.getUniqueId(), 0);
+			mostrarTiempo(player);
 			player.sendMessage("Empieza el parkour del Lobby.");
 		} else {
 			tiempos.replace(player.getUniqueId(), System.currentTimeMillis());
 			checkpoints.replace(player.getUniqueId(), 0);
 			player.sendMessage("Tiempo reiniciado, vuelves a empezar");
 		}
+	}
+	
+	private void mostrarTiempo(Player player) {
+		BukkitTask runnable = new BukkitRunnable() {
+            @Override
+            public void run() {
+            	Long tiempo = System.currentTimeMillis() - tiempos.get(player.getUniqueId());
+            	player.sendActionBar(ChatColor.DARK_GRAY + "Tiempo: " + TimeUnit.MILLISECONDS.toMinutes(tiempo) +  ":" + TimeUnit.MILLISECONDS.toSeconds(tiempo) %60 + "." + (tiempo-TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(tiempo))));
+            }
+        }.runTaskTimerAsynchronously(plugin, 0, 1);
+        tareas.put(player.getUniqueId(), runnable);
 	}
 	
 	private void siguienteCheckpoint(PlayerInteractEvent event) {
@@ -126,12 +151,16 @@ public class ParkourEventos implements Listener {
 	private void finParkour(Player player) {
 		Long tiempo = System.currentTimeMillis() - tiempos.get(player.getUniqueId());
 		player.sendMessage("Has completado el parkour en " + TimeUnit.MILLISECONDS.toMinutes(tiempo) +  ":" + TimeUnit.MILLISECONDS.toSeconds(tiempo) %60 + "." + (tiempo-TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(tiempo))));
+		tareas.get(player.getUniqueId()).cancel();
+		tareas.remove(player.getUniqueId());
 		tiempos.remove(player.getUniqueId());
 		checkpoints.remove(player.getUniqueId());
 	}
 	
 	private void cancelarParkour(Player player) {
 		if (tiempos.get(player.getUniqueId()) != null) {
+			tareas.get(player.getUniqueId()).cancel();
+			tareas.remove(player.getUniqueId());
 			tiempos.remove(player.getUniqueId());
 			checkpoints.remove(player.getUniqueId());
 		}
