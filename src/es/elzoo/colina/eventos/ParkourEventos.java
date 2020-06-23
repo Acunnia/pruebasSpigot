@@ -16,18 +16,17 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 
-import net.md_5.bungee.api.ChatColor;
-
 public class ParkourEventos implements Listener {
 	static private Map<UUID, Long> tiempos = new HashMap<>();
 	static private Map<UUID, Integer> checkpoints = new HashMap<>();
 	
-	static private final Integer cpoints = 4;
+	static private final Integer cpoints = 5;
 	
 	@EventHandler
 	public void onPressurePlate(PlayerInteractEvent event) {
 		if (event.getAction().equals(Action.PHYSICAL)) {
-			if (event.getClickedBlock().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
+			Location loc = event.getClickedBlock().getLocation();
+			if (event.getClickedBlock().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE && (new Location(event.getPlayer().getWorld(), loc.getX(), loc.getBlockY()-1, loc.getZ()).getBlock()).getType() == Material.BEDROCK) {
 				empezarParkour(event.getPlayer());
 			} else if (event.getClickedBlock().getType() == Material.LIGHT_WEIGHTED_PRESSURE_PLATE) {
 				siguienteCheckpoint(event);
@@ -55,27 +54,64 @@ public class ParkourEventos implements Listener {
 	private void siguienteCheckpoint(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		if (tiempos.get(player.getUniqueId()) == null) {
-			player.sendMessage(ChatColor.BOLD+"Aquí no se empieza el parkour! Vuelve atrás y busca el inicio.");
+			return;
 		} else {
 			Integer actual = checkpoints.get(player.getUniqueId());
 			Location loc = event.getClickedBlock().getLocation();
 			Block debajo = new Location(event.getPlayer().getWorld(), loc.getX(), loc.getBlockY()-1, loc.getZ()).getBlock();
 			switch (debajo.getType()) {
 			case LIME_CONCRETE:
-				actual = 1;
+				if (actual < 1) {
+					actual = 1;
+				} else if (actual == 1) {
+					return;
+				} else {
+					player.sendMessage("Te has saltado algo");
+					return;
+				}
 				break;
 			case GREEN_CONCRETE:
-				actual = 2;
+				if (actual < 2) {
+					actual = 2;
+				} else if (actual == 2) {
+					return;
+				} else {
+					player.sendMessage("Te has saltado algo");
+					return;
+				}
 				break;
 			case YELLOW_CONCRETE:
-				actual = 3;
+				if (actual < 3) {
+					actual = 3;
+				} else if (actual == 3) {
+					return;
+				} else {
+					player.sendMessage("Te has saltado algo");
+					return;
+				}
 				break;
 			case ORANGE_CONCRETE:
-				actual = 4;
+				if (actual < 4) {
+					actual = 4;
+				} else if (actual == 4) {
+					return;
+				} else {
+					player.sendMessage("Te has saltado algo");
+					return;
+				}
+				break;
+			case RED_CONCRETE:
+				if (actual < 5) {
+					actual = 5;
+				} else if (actual == 5) {
+					return;
+				} else {
+					player.sendMessage("Te has saltado algo");
+					return;
+				}
 				break;
 			default:
-				actual = 5;
-				break;
+				return;
 			}
 			
 			if (actual == cpoints) {
