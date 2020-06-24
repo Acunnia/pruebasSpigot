@@ -14,16 +14,15 @@ import es.elzoo.colina.eventos.ParkourEventos;
 
 public class Main extends JavaPlugin {
 	private DamageIndicatorEventos diEventos;
-	
 	@Override
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(new CartelesEventos(), this);
 		getServer().getPluginManager().registerEvents(new ParkourEventos(this), this);
 		Bukkit.getPluginManager().registerEvents(diEventos = new DamageIndicatorEventos(this), this);
+		
 		startTask();
 	}
-	
-	
+		
 	private void startTask() {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
 			LobbyScoreboard.estado++;

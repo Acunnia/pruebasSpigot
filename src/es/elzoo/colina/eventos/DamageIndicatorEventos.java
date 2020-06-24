@@ -50,9 +50,6 @@ public class DamageIndicatorEventos implements Listener {
 	
 	public ArmorStand spawnArmorStand(Location loc, String name) {
         ArmorStand armorStand = buildArmorStand(loc, plugin.getConfig().getDouble("Damage Indicator.Distance"), armorStandMeta, name);
-//        if (hider != null) {
-//            Bukkit.getOnlinePlayers().stream().filter(op -> !plugin.getStorageProvider().showArmorStand(op)).forEach(op -> hider.hideEntity(op, armorStand));
-//        }
         armorStands.put(armorStand, System.currentTimeMillis());
         return armorStand;
     }
